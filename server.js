@@ -199,9 +199,13 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`🚀 OmniVoice AI -> Bitrix24 Engine is live on port ${PORT}`);
-  console.log(`👉 Real-Time Web Dashboard: http://localhost:${PORT}`);
-  console.log(`====================================================`);
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`====================================================`);
+    console.log(`🚀 OmniVoice AI -> Bitrix24 Engine is live on port ${PORT}`);
+    console.log(`👉 Real-Time Web Dashboard: http://localhost:${PORT}`);
+    console.log(`====================================================`);
+  });
+}
+
+module.exports = app;
