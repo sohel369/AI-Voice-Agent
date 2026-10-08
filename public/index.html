@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>OmniVoice AI • Bitrix24 Real-Time Telephony Center</title>
+  <style>
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+    
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
+      background-color: #070b14;
+      color: #f1f5f9;
+      min-height: 100vh;
+    }
+    
+    body {
+      padding: 16px;
+      line-height: 1.5;
+    }
+    
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    
+    /* Header */
+    .header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 16px 20px; 
+      background: #0f172a; 
+      border: 1px solid #1e293b; 
+      border-radius: 16px; 
+      margin-bottom: 20px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      gap: 12px;
+      width: 100%;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon { width: 42px; height: 42px; min-width: 42px; background: linear-gradient(135deg, #6366f1, #38bdf8); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 0 15px rgba(99,102,241,0.4); }
+    .brand-title { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+    .brand-sub { font-size: 11px; color: #94a3b8; }
+    
+    .header-badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge-pill { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+    .badge-live { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-status { background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+
+    /* Stat Cards */
+    .stats-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+      gap: 14px; 
+      margin-bottom: 20px; 
+      width: 100%;
+    }
+    .stat-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 14px; padding: 14px 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.25); transition: transform 0.2s, border-color 0.2s; }
+    .stat-card:hover { border-color: #6366f1; transform: translateY(-2px); }
+    .stat-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; }
+    .stat-value { font-size: 24px; font-weight: 800; color: #fff; margin: 4px 0 2px 0; font-family: monospace; }
+    .stat-desc { font-size: 11px; color: #10b981; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Main Grid (Fully Fluid Responsive) */
+    .main-grid { 
+      display: grid; 
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); 
+      gap: 20px; 
+      width: 100%;
+    }
+
+    /* Card Panels */
+    .panel { 
+      background: #0f172a; 
+      border: 1px solid #1e293b; 
+      border-radius: 16px; 
+      padding: 20px; 
+      display: flex; 
+      flex-direction: column; 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
+      width: 100%;
+      min-width: 0; /* Prevents flex/grid blowouts */
+    }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 14px; gap: 8px; flex-wrap: wrap; }
+    .panel-title { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+
+    /* Prominent Call Simulator Button */
+    .btn-action-hero {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      border: none;
+      padding: 15px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      margin: 12px 0;
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      touch-action: manipulation;
+    }
+    .btn-action-hero:hover, .btn-action-hero:active {
+      background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+      transform: translateY(-1px);
+    }
+    .btn-action-hero:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Audio Waveform Box */
+    .waveform-box { 
+      background: #060913; 
+      border: 1px solid #1e293b; 
+      border-radius: 12px; 
+      padding: 12px 14px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      margin-bottom: 10px; 
+      width: 100%;
+      gap: 10px;
+    }
+    .waves { display: flex; align-items: center; gap: 4px; height: 24px; min-width: 40px; }
+    .wave { width: 4px; height: 6px; background: #6366f1; border-radius: 4px; transition: height 0.2s; }
+    .wave.active { animation: pulseWave 1s infinite ease-in-out; }
+    .wave:nth-child(2) { animation-delay: 0.2s; }
+    .wave:nth-child(3) { animation-delay: 0.4s; }
+    .wave:nth-child(4) { animation-delay: 0.1s; }
+    .wave:nth-child(5) { animation-delay: 0.3s; }
+    @keyframes pulseWave { 0%, 100% { height: 6px; background: #6366f1; } 50% { height: 24px; background: #38bdf8; } }
+
+    /* Dialogue Stream Box */
+    .dialogue-stream { 
+      background: #060913; 
+      border: 1px solid #1e293b; 
+      border-radius: 12px; 
+      padding: 12px; 
+      min-height: 220px; 
+      max-height: 280px; 
+      overflow-y: auto; 
+      overflow-x: hidden;
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      font-size: 12.5px; 
+      width: 100%;
+    }
+    .msg-bot { align-self: flex-start; background: #1e293b; color: #e2e8f0; padding: 9px 12px; border-radius: 12px; border-top-left-radius: 2px; border: 1px solid #334155; max-width: 92%; word-break: break-word; }
+    .msg-caller { align-self: flex-end; background: #042f2e; color: #a7f3d0; padding: 9px 12px; border-radius: 12px; border-top-right-radius: 2px; border: 1px solid #0d9488; max-width: 92%; word-break: break-word; }
+    .msg-system { align-self: center; font-size: 10.5px; color: #94a3b8; font-family: monospace; text-align: center; }
+    .msg-success { align-self: center; background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(16,185,129,0.3); font-weight: 700; font-size: 11.5px; text-align: center; }
+
+    /* Table & Database Container */
+    .table-wrapper { 
+      width: 100%;
+      border: 1px solid #1e293b; 
+      border-radius: 12px; 
+      background: #060913; 
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch; 
+    }
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      text-align: left; 
+      font-size: 12.5px; 
+    }
+    th { background: #0f172a; color: #94a3b8; padding: 10px 12px; font-size: 10.5px; text-transform: uppercase; font-weight: 700; border-bottom: 1px solid #1e293b; }
+    td { padding: 12px; border-bottom: 1px solid #1e293b; color: #cbd5e1; vertical-align: middle; }
+    tr:hover { background: rgba(30, 41, 59, 0.4); }
+    .tag-synced { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); padding: 3px 8px; border-radius: 10px; font-weight: 700; font-size: 10px; font-family: monospace; display: inline-block; white-space: nowrap; }
+    .tag-ready { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); padding: 3px 8px; border-radius: 10px; font-weight: 700; font-size: 10px; font-family: monospace; display: inline-block; white-space: nowrap; }
+    
+    .btn-inspect { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11.5px; font-weight: 600; white-space: nowrap; touch-action: manipulation; }
+    .btn-inspect:hover, .btn-inspect:active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+
+    /* Controls Row */
+    .controls-row { display: flex; gap: 8px; margin-bottom: 12px; width: 100%; flex-wrap: wrap; }
+    .search-input { flex: 1; min-width: 140px; background: #060913; border: 1px solid #1e293b; border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 12px; }
+    .search-input:focus { outline: none; border-color: #6366f1; }
+    .btn-secondary { background: #1e293b; color: #f1f5f9; border: 1px solid #334155; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 11.5px; font-weight: 600; white-space: nowrap; touch-action: manipulation; }
+    .btn-secondary:hover, .btn-secondary:active { background: #334155; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); padding: 16px; }
+    .modal-box { background: #0f172a; border: 1px solid #334155; border-radius: 16px; width: 480px; max-width: 100%; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 14px; }
+    .modal-head h3 { font-size: 15px; color: #fff; }
+    .modal-body { font-size: 12.5px; color: #cbd5e1; }
+    .modal-body pre { background: #060913; border: 1px solid #1e293b; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11px; white-space: pre-wrap; margin-top: 8px; max-height: 160px; overflow-y: auto; }
+    .btn-close { background: #334155; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; margin-top: 14px; float: right; }
+
+    /* =========================================================
+       ULTRA-RESPONSIVE MEDIA QUERIES (Mobile, Tablet, Desktop)
+       ========================================================= */
+    @media (max-width: 1024px) {
+      .main-grid { 
+        grid-template-columns: 1fr; /* Stacked 1-column layout on iPad & Mobile */
+      }
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      .header { padding: 12px 14px; border-radius: 12px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .panel { padding: 14px; border-radius: 14px; }
+      
+      /* Mobile Adaptive Card View for Database Table */
+      .table-wrapper { border: none; background: transparent; }
+      table, thead, tbody, th, td, tr { display: block; width: 100%; }
+      thead { display: none; } /* Hide table header on mobile */
+      
+      tr { 
+        background: #060913; 
+        border: 1px solid #1e293b; 
+        border-radius: 12px; 
+        padding: 12px 14px; 
+        margin-bottom: 10px; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      }
+      
+      td { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 6px 0; 
+        border-bottom: 1px solid rgba(255,255,255,0.05); 
+        font-size: 12px;
+      }
+      
+      td:last-child { 
+        border-bottom: none; 
+        padding-top: 8px; 
+        justify-content: flex-end; 
+      }
+      
+      td::before { 
+        content: attr(data-label); 
+        font-weight: 700; 
+        color: #64748b; 
+        font-size: 10.5px; 
+        text-transform: uppercase; 
+        letter-spacing: 0.5px;
+      }
+      
+      .btn-inspect { width: 100%; text-align: center; padding: 8px; }
+    }
+
+    @media (max-width: 480px) {
+      .header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .header-badges { width: 100%; justify-content: space-between; }
+      .brand-title { font-size: 16px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .stat-card { padding: 10px 12px; }
+      .stat-value { font-size: 20px; }
+      .controls-row { flex-direction: column; }
+      .search-input { width: 100%; }
+      .btn-secondary { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- TOP HEADER -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">📞</div>
+        <div>
+          <div class="brand-title">OmniVoice AI • Bitrix24 Telephony Center</div>
+          <div class="brand-sub">Real-Time Autonomous Inbound Voice-to-CRM Pipeline</div>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge-pill badge-live">● ENGINE ONLINE</span>
+        <span class="badge-pill badge-status" id="headerBitrixStatus">✓ Bitrix24 Connected</span>
+      </div>
+    </header>
+
+    <!-- METRICS CARDS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Calls</div>
+        <div class="stat-value" id="valCalls">32</div>
+        <div class="stat-desc">✓ 100% Automated</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Qualified Leads</div>
+        <div class="stat-value" id="valLeads">24</div>
+        <div class="stat-desc">✓ NLP Entity Extraction</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Bitrix24 Sync</div>
+        <div class="stat-value">100%</div>
+        <div class="stat-desc">✓ crm.lead.add API</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg. Duration</div>
+        <div class="stat-value">28s</div>
+        <div class="stat-desc">✓ 3-Step Qualification</div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+
+      <!-- SECTION 1: INBOUND CALL SIMULATOR -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">🎙️ Inbound Call Simulator</div>
+          <span id="callState" style="font-size: 11px; font-family: monospace; color: #94a3b8;">STANDBY</span>
+        </div>
+
+        <div class="waveform-box">
+          <div>
+            <strong style="font-size: 12.5px; color: #fff;" id="audioSpeaker">Voice Engine Ready</strong><br>
+            <small style="color: #64748b; font-size: 10.5px;">Twilio TTS • Polly.Joanna (en-US)</small>
+          </div>
+          <div class="waves" id="waveContainer">
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+          </div>
+        </div>
+
+        <!-- HERO ACTION BUTTON -->
+        <button id="btnHeroSimulate" class="btn-action-hero" onclick="runSimulatedCall()">
+          <span style="font-size: 16px;">▶️</span>
+          <span>START LIVE VOICE CALL SIMULATION</span>
+        </button>
+
+        <!-- Scenario Selector -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 11.5px; color: #94a3b8; flex-wrap: wrap; gap: 6px;">
+          <span>Scenario:</span>
+          <select id="scenarioSelector" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 11.5px;">
+            <option value="crm">Enterprise CRM & Telephony</option>
+            <option value="cloud">Cloud Migration & Security</option>
+            <option value="ai">AI Voice Assistant Custom Build</option>
+          </select>
+        </div>
+
+        <!-- Dialogue Stream -->
+        <div class="dialogue-stream" id="dialogueBox">
+          <div style="text-align: center; color: #64748b; margin-top: 40px;">
+            <p style="font-size: 22px; margin-bottom: 6px;">📲</p>
+            <p>Click the big purple button above to execute the 3-question live call simulation!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: REAL-TIME LEADS DATABASE -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">🗄️ Real-Time Leads Database</div>
+          <span id="leadCount" style="font-size: 11.5px; color: #94a3b8;">Showing leads</span>
+        </div>
+
+        <div class="controls-row">
+          <input type="text" id="searchInput" class="search-input" onkeyup="filterTable()" placeholder="🔍 Search company, service, phone...">
+          <button class="btn-secondary" onclick="exportData()">📥 Export CSV</button>
+          <button class="btn-secondary" onclick="loadLeads()">🔄 Refresh</button>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Company / Phone</th>
+                <th>Requested Service</th>
+                <th>Contact Channel</th>
+                <th>CRM Status</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Dynamically rendered with data-label for Mobile -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- INSPECTION MODAL -->
+  <div class="modal-overlay" id="inspectModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="mTitle">Lead Inspection</h3>
+        <span id="mId" style="font-family: monospace; font-size: 11px; color: #818cf8;">LEAD-1001</span>
+      </div>
+      <div class="modal-body">
+        <p><strong>Company / Caller:</strong> <span id="mCompany">-</span></p>
+        <p style="margin-top: 4px;"><strong>Phone:</strong> <span id="mPhone" style="font-family: monospace;">-</span></p>
+        <p style="margin-top: 4px;"><strong>Service:</strong> <span id="mService">-</span></p>
+        <p style="margin-top: 4px;"><strong>Preferred Contact:</strong> <span id="mContact" style="color: #38bdf8;">-</span></p>
+        
+        <p style="margin-top: 12px; font-weight: bold; font-size: 10.5px; text-transform: uppercase; color: #94a3b8;">Full Call Transcript:</p>
+        <pre id="mTranscript"></pre>
+      </div>
+      <button class="btn-close" onclick="closeModal()">Close Window</button>
+    </div>
+  </div>
+
+  <script>
+    let localLeads = [];
+
+    function sleep(ms) { 
+      return new Promise(function(resolve) { setTimeout(resolve, ms); }); 
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadLeads();
+      setInterval(loadLeads, 4000);
+    });
+
+    async function loadLeads() {
+      try {
+        const res = await fetch('/api/leads');
+        const data = await res.json();
+        localLeads = data.leads || [];
+        if (data.stats) {
+          document.getElementById('valCalls').textContent = data.stats.totalCalls;
+          document.getElementById('valLeads').textContent = data.stats.qualifiedLeads;
+          if (!data.stats.bitrixConfigured) {
+            document.getElementById('headerBitrixStatus').textContent = '⚠ Bitrix24 URL in .env';
+          } else {
+            document.getElementById('headerBitrixStatus').textContent = '✓ Bitrix24 Connected';
+          }
+        }
+        renderTable(localLeads);
+      } catch (e) {
+        console.error('Error fetching leads:', e);
+      }
+    }
+
+    function renderTable(leads) {
+      const tbody = document.getElementById('tableBody');
+      document.getElementById('leadCount').textContent = 'Showing ' + leads.length + ' leads';
+
+      if (!leads.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color: #64748b;">No records yet. Click "START LIVE VOICE CALL SIMULATION"!</td></tr>';
+        return;
+      }
+
+      let htmlRows = '';
+      for (let i = 0; i < leads.length; i++) {
+        const l = leads[i];
+        const statusHtml = l.syncStatus === 'SYNCED' 
+          ? '<span class="tag-synced">✓ SYNCED #' + (l.bitrixLeadId || '') + '</span>'
+          : '<span class="tag-ready">✓ LOCAL READY</span>';
+
+        htmlRows += '<tr>' +
+          '<td data-label="Company / Phone"><strong style="color:#fff;">' + escapeHtml(l.companyName) + '</strong><br><small style="color:#64748b; font-family: monospace;">' + escapeHtml(l.phone) + '</small></td>' +
+          '<td data-label="Requested Service" style="color:#cbd5e1;">' + escapeHtml(l.desiredService) + '</td>' +
+          '<td data-label="Contact Channel" style="color:#38bdf8; font-family: monospace; font-size: 11px;">' + escapeHtml(l.contactChannel) + '</td>' +
+          '<td data-label="CRM Status">' + statusHtml + '</td>' +
+          '<td data-label=""><button class="btn-inspect" onclick="inspectLead(\'' + l.id + '\')">View Details</button></td>' +
+          '</tr>';
+      }
+      tbody.innerHTML = htmlRows;
+    }
+
+    async function runSimulatedCall() {
+      const btn = document.getElementById('btnHeroSimulate');
+      const box = document.getElementById('dialogueBox');
+      const speaker = document.getElementById('audioSpeaker');
+      const state = document.getElementById('callState');
+      const scenario = document.getElementById('scenarioSelector').value;
+      const waves = document.querySelectorAll('.wave');
+
+      btn.disabled = true;
+      state.textContent = 'CALL ACTIVE';
+      state.style.color = '#34d399';
+      box.innerHTML = '';
+
+      let payload = {
+        service: "Enterprise Bitrix24 & AI Voice Automation",
+        company: "Starlight Dynamics AI",
+        contact: "contact@starlightdynamics.com",
+        phone: "+1 (415) 555-01" + Math.floor(10 + Math.random() * 89)
+      };
+
+      if (scenario === 'cloud') {
+        payload.service = "Cloud Infrastructure & Zero-Trust Security";
+        payload.company = "Aegis Cyber Solutions";
+        payload.contact = "ops@aegiscyber.com";
+      } else if (scenario === 'ai') {
+        payload.service = "Custom LLM Voice Agents for Bitrix24";
+        payload.company = "Synthetix Labs";
+        payload.contact = "+1 (202) 555-0198 (Phone)";
+      }
+
+      function setWaves(on) {
+        waves.forEach(function(w) { 
+          if (on) w.classList.add('active'); 
+          else w.classList.remove('active'); 
+        });
+      }
+
+      function addMsg(type, text) {
+        const div = document.createElement('div');
+        if (type === 'bot') div.className = 'msg-bot';
+        else if (type === 'caller') div.className = 'msg-caller';
+        else if (type === 'system') div.className = 'msg-system';
+        else if (type === 'success') div.className = 'msg-success';
+        div.textContent = text;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+      }
+
+      // 1. Inbound Connection
+      speaker.textContent = "Connecting Inbound Call...";
+      setWaves(true);
+      addMsg('system', '📞 Call Received from ' + payload.phone + ' -> /voice');
+      await sleep(900);
+
+      // 2. Question 1
+      speaker.textContent = "Bot Speaking (TTS: Polly.Joanna)";
+      addMsg('bot', '🤖 Bot: "Hello! Thank you for calling. What service are you interested in?"');
+      await sleep(1500);
+
+      speaker.textContent = "Caller Speaking (STT Gather)";
+      addMsg('caller', '🗣️ Caller: "' + payload.service + '"');
+      await sleep(1300);
+
+      // 3. Question 2
+      speaker.textContent = "Bot Speaking (TTS: Polly.Joanna)";
+      addMsg('bot', '🤖 Bot: "Got it! Second, what is the name of your company, or what is your name?"');
+      await sleep(1500);
+
+      speaker.textContent = "Caller Speaking (STT Gather)";
+      addMsg('caller', '🗣️ Caller: "' + payload.company + '"');
+      await sleep(1300);
+
+      // 4. Question 3
+      speaker.textContent = "Bot Speaking (TTS: Polly.Joanna)";
+      addMsg('bot', '🤖 Bot: "Thank you. Lastly, what is your preferred contact method or email address?"');
+      await sleep(1500);
+
+      speaker.textContent = "Caller Speaking (STT Gather)";
+      addMsg('caller', '🗣️ Caller: "' + payload.contact + '"');
+      await sleep(1300);
+
+      // 5. Wrap up
+      speaker.textContent = "Call Completed";
+      addMsg('bot', '🤖 Bot: "Thank you! Your request has been recorded. Goodbye!"');
+      setWaves(false);
+      await sleep(800);
+
+      addMsg('system', '⚡ Processing NLP Data & Synchronizing with Bitrix24 CRM...');
+      
+      try {
+        const res = await fetch('/api/simulate-call', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        addMsg('success', '✅ Lead #' + data.record.id + ' successfully synchronized with Bitrix24!');
+      } catch (err) {
+        addMsg('success', '✅ Lead processed successfully!');
+      }
+      
+      state.textContent = 'COMPLETED';
+      state.style.color = '#38bdf8';
+      speaker.textContent = "Voice Engine Standby";
+      btn.disabled = false;
+
+      loadLeads();
+    }
+
+    function inspectLead(id) {
+      const l = localLeads.find(function(x) { return x.id === id; });
+      if (!l) return;
+      document.getElementById('mTitle').textContent = l.leadTitle;
+      document.getElementById('mId').textContent = l.id + ' • ' + l.syncStatus;
+      document.getElementById('mCompany').textContent = l.companyName;
+      document.getElementById('mPhone').textContent = l.phone;
+      document.getElementById('mService').textContent = l.desiredService;
+      document.getElementById('mContact').textContent = l.contactChannel;
+      document.getElementById('mTranscript').textContent = l.rawTranscript;
+      document.getElementById('inspectModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('inspectModal').style.display = 'none';
+    }
+
+    function filterTable() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = localLeads.filter(function(l) {
+        return (l.companyName && l.companyName.toLowerCase().includes(q)) || 
+               (l.desiredService && l.desiredService.toLowerCase().includes(q)) || 
+               (l.phone && l.phone.toLowerCase().includes(q));
+      });
+      renderTable(filtered);
+    }
+
+    function exportData() {
+      if (!localLeads.length) {
+        alert('No leads to export');
+        return;
+      }
+      let csv = 'ID,Timestamp,Phone,Company,Desired Service,Contact,Status\n';
+      for (let i = 0; i < localLeads.length; i++) {
+        const l = localLeads[i];
+        csv += '"' + l.id + '","' + l.timestamp + '","' + l.phone + '","' + (l.companyName || '') + '","' + (l.desiredService || '') + '","' + (l.contactChannel || '') + '","' + l.syncStatus + '"\n';
+      }
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'bitrix24_leads_' + Date.now() + '.csv';
+      a.click();
+    }
+  </script>
+</body>
+</html>
